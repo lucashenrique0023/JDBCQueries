@@ -1,18 +1,17 @@
 package lab.lhss;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.TimeZone;
+import java.sql.*;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-
-        String[] products = { "Cheese", "Beans", "Salt", "Sugar" };
-
         String url = "jdbc:mysql://localhost:3306/store?useTimezone=true&serverTimezone=UTC";
+
+        getProductsFromDatabase(url);
+    }
+
+    private static void createProductsOnDatabase(String url) throws SQLException {
+        String[] products = { "Cheese", "Beans", "Salt", "Sugar" };
 
         try (Connection conn = DriverManager.getConnection(url, "root", "as@12as")) {
             System.out.println("Successfully connected to Database.");
@@ -24,6 +23,27 @@ public class Main {
                 }
             }
         }
+    }
+
+    private static void getProductsFromDatabase(String url) throws SQLException {
+
+        try (Connection conn = DriverManager.getConnection(url, "root", "as@12as")) {
+            System.out.println("Successfully connected to Database.");
+
+            String sql = "SELECT ID, NAME FROM PRODUCT";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while(rs.next()) {
+                        int id = rs.getInt("ID");
+                        String name = rs.getString("NAME");
+                        System.out.println("ID: " + id + ", NAME: " + name);
+                    }
+                }
+            }
+        }
 
     }
+
+
 }
