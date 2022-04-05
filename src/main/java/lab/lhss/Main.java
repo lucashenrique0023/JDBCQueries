@@ -7,7 +7,45 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String url = "jdbc:mysql://localhost:3306/store?useTimezone=true&serverTimezone=UTC";
 
-        insertManyProducts(url);
+        insertProductsAndItens(url);
+    }
+
+    private static void insertProductsAndItens(String url) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(url, "root", "as@12as")) {
+            System.out.println("Successfully connected to Database.");
+
+            String sqlProduct = "INSERT INTO PRODUCT (ID, NAME) VALUES (?, ?)";
+            String sqlItem = "INSERT INTO ITEM (PRODUCT_ID, PRICE) VALUES (?, ?)";
+
+            try (PreparedStatement stmtProduct = conn.prepareStatement(sqlProduct);
+                 PreparedStatement stmtItem = conn.prepareStatement(sqlItem)) {
+
+                conn.setAutoCommit(false);
+
+                try {
+                    stmtProduct.setInt(1,1);
+                    stmtProduct.setString(2,"Rice");
+                    stmtProduct.executeUpdate();
+
+                    stmtItem.setInt(1, 1);
+                    stmtItem.setDouble(2, 3.50);
+                    stmtItem.executeUpdate();
+
+                    Object o = null;
+                    o.toString(); // Throws exception
+
+                    stmtItem.setInt(1, 1);
+                    stmtItem.setDouble(2, 4.70);
+                    stmtItem.executeUpdate();
+
+                    conn.commit();
+
+                } catch (Exception e) {
+                    conn.rollback();
+                }
+
+            }
+        }
     }
 
     private static void createProductsOnDatabase(String url) throws SQLException {
