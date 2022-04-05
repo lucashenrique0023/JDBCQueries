@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String url = "jdbc:mysql://localhost:3306/store?useTimezone=true&serverTimezone=UTC";
 
-        getProductsFromDatabase(url);
+        insertManyProducts(url);
     }
 
     private static void createProductsOnDatabase(String url) throws SQLException {
@@ -26,7 +26,6 @@ public class Main {
     }
 
     private static void getProductsFromDatabase(String url) throws SQLException {
-
         try (Connection conn = DriverManager.getConnection(url, "root", "as@12as")) {
             System.out.println("Successfully connected to Database.");
 
@@ -42,7 +41,23 @@ public class Main {
                 }
             }
         }
+    }
 
+    private static void insertManyProducts(String url) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(url, "root", "as@12as")) {
+            System.out.println("Successfully connected to Database.");
+
+            String sql = "INSERT INTO PRODUCT (NAME) VALUES (?)";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int i = 1; i <= 1000; i++) {
+                    stmt.setString(1, "Product "+ i);
+                    stmt.addBatch();
+                }
+                // Execute only 1 request
+                stmt.executeBatch();
+            }
+        }
     }
 
 
